@@ -1,0 +1,30 @@
+[package]
+name = "myriadmesh-ledger"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+# Workspace dependencies
+serde = { workspace = true }
+bincode = { workspace = true }
+tokio = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+hex = { workspace = true }
+blake2 = { workspace = true }
+rand = { workspace = true }
+
+# Internal crates
+myriadmesh-protocol = { workspace = true }
+myriadmesh-crypto = { path = "../../../myriadmesh-core/crates/myriadmesh-crypto" }
+
+# Additional dependencies
+chrono = { workspace = true }
+serde_json = "1.0"
+
+[dev-dependencies]
+criterion = { workspace = true }
+tempfile = { workspace = true }

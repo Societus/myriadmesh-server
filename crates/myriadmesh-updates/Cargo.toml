@@ -1,0 +1,42 @@
+[package]
+name = "myriadmesh-updates"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+# MyriadMesh crates
+myriadmesh-crypto = { path = "../../../myriadmesh-core/crates/myriadmesh-crypto" }
+myriadmesh-protocol.workspace = true
+myriadmesh-network = { path = "../../../myriadmesh-node/crates/myriadmesh-network" }
+myriadmesh-dht = { path = "../../../myriadmesh-core/crates/myriadmesh-dht" }
+
+# Serialization
+serde = { workspace = true }
+bincode = { workspace = true }
+serde-big-array = "0.5"
+
+# Async runtime
+tokio = { workspace = true }
+
+# Error handling
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+
+# Cryptography
+blake2 = { workspace = true }
+sodiumoxide = { workspace = true }
+
+# Logging
+log = "0.4"
+
+# Utilities
+chrono = { workspace = true }
+hex = { workspace = true }
+uuid = { version = "1.6", features = ["v4", "serde"] }
+serde_bytes = "0.11"
+
+[dev-dependencies]
+tempfile = { workspace = true }

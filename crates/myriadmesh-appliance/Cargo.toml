@@ -1,0 +1,48 @@
+[package]
+name = "myriadmesh-appliance"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+# Core dependencies
+anyhow = "1.0"
+thiserror = "1.0"
+tokio = { version = "1.35", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Storage (JSON-based for simplicity, can migrate to SQL later)
+# Future: Consider adding sqlx when needed for performance
+
+# Crypto
+ed25519-dalek = "2.1"
+rand = "0.8"
+blake2 = "0.10"
+hex = "0.4"
+
+# Async utilities
+async-trait = "0.1"
+futures = "0.3"
+
+# Logging
+tracing = "0.1"
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# UUID generation
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# Internal dependencies
+myriadmesh-crypto = { path = "../../../myriadmesh-core/crates/myriadmesh-crypto" }
+myriadmesh-protocol.workspace = true
+
+# Logging
+log = "0.4"
+
+[dev-dependencies]
+tempfile = "3.8"
+tokio-test = "0.4"

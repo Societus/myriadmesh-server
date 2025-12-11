@@ -1,0 +1,44 @@
+{
+  "performance": {
+    "max_init_duration_ms": 5000,
+    "max_phase_durations": {
+      "StorageInit": 100,
+      "RouterInit": 50,
+      "LedgerInit": 500,
+      "DhtInit": 200,
+      "RouterCallbacksSet": 10,
+      "Complete": 5000
+    },
+    "baseline_date": 1763445208,
+    "version": "0.1.0"
+  },
+  "reliability": {
+    "max_failures_per_100": 5,
+    "zero_tolerance_failures": [
+      "InitializationFailure",
+      "RouterIntegrationFailure"
+    ],
+    "acceptable_failures": {
+      "ConfigurationError": 0,
+      "NetworkFailure": 10
+    }
+  },
+  "integration": {
+    "require_complete_router_integration": true,
+    "require_queue_processor": true,
+    "require_local_delivery_processor": true,
+    "required_lifecycle_sequence": [
+      "NodeStarting",
+      "QueueProcessorStarted",
+      "NodeReady"
+    ],
+    "required_init_phases": [
+      "StorageInit",
+      "RouterInit",
+      "RouterCallbacksSet",
+      "Complete"
+    ]
+  },
+  "last_updated": 1763445208,
+  "sample_size": 1
+}

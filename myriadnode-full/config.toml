@@ -1,0 +1,557 @@
+# MyriadNode Configuration
+# =======================
+# This is the default configuration for MyriadNode.
+# Copy this file and customize it for your deployment.
+
+[node]
+# Node identity
+# Run `myriadnode --init` to generate a unique ID and keypair
+id = "0000000000000000000000000000000000000000000000000000000000000000"
+name = "myriad-node"
+
+# Is this a primary node (vs relay-only)?
+# Primary nodes can store messages for accounts
+primary = true
+
+# Data directory
+# Leave empty to use default: ~/.local/share/myriadnode (Linux)
+data_directory = ""
+
+# ============================================================================
+# API Configuration
+# ============================================================================
+[api]
+enabled = true
+bind = "127.0.0.1"
+port = 8080
+
+# CORS settings
+# For development: ["http://localhost:5173"]
+# For production: ["https://your-domain.com"]
+# Use ["*"] to allow all origins (not recommended for production)
+cors_origins = ["http://localhost:5173"]
+
+# Authentication (IMPORTANT: Enable for production!)
+[api.auth]
+enabled = false
+# Generate a secure token: openssl rand -hex 32
+token = ""
+
+# ============================================================================
+# Network Adapters
+# ============================================================================
+
+# Ethernet / Wi-Fi (IP-based adapters)
+[network.adapters.ethernet]
+enabled = true
+auto_start = true
+allow_backhaul_mesh = false  # Don't broadcast mesh over internet uplink
+allow_heartbeat = true       # Send heartbeats on local network
+
+# Bluetooth Classic
+[network.adapters.bluetooth]
+enabled = true
+auto_start = true
+allow_heartbeat = true
+
+# Bluetooth Low Energy
+[network.adapters.bluetooth_le]
+enabled = true
+auto_start = true
+allow_heartbeat = true
+
+# Cellular / Mobile Data
+[network.adapters.cellular]
+enabled = false              # Disabled by default (cost)
+auto_start = false
+allow_backhaul_mesh = false  # Never use as mesh backhaul
+allow_heartbeat = false      # Don't send heartbeats over cellular
+
+# LoRaWAN
+[network.adapters.lorawan]
+enabled = false
+auto_start = false
+allow_heartbeat = true
+heartbeat_interval_override = 300  # Less frequent (5 min) due to spectrum constraints
+
+# I2P (Anonymous overlay network)
+[network.adapters.i2p]
+enabled = false
+auto_start = false
+allow_heartbeat = true
+
+# Amateur Radio APRS
+[network.adapters.aprs]
+enabled = false
+auto_start = false
+allow_heartbeat = false      # Spectrum conservation
+
+# Dial-Up Networking (DUN) via Bluetooth
+[network.adapters.dun]
+enabled = false
+auto_start = false
+allow_heartbeat = false      # Very expensive, rely on reported health
+
+# ============================================================================
+# Scoring System
+# ============================================================================
+[network.scoring]
+# Scoring mode: default, battery, performance, reliability, privacy
+mode = "default"
+
+# Recalculation interval (seconds)
+recalculation_interval_secs = 60
+
+# Manual weight configuration (overrides mode if set)
+# Weights must sum to 1.0
+# Leave commented to use mode presets
+# weight_latency = 0.25
+# weight_bandwidth = 0.20
+# weight_reliability = 0.30
+# weight_power = 0.10
+# weight_privacy = 0.15
+
+# ============================================================================
+# Failover System
+# ============================================================================
+[network.failover]
+# Enable automatic failover
+auto_failover = true
+
+# Latency threshold multiplier
+# Switch if latency exceeds baseline * this multiplier
+latency_threshold_multiplier = 5.0
+
+# Packet loss threshold (0.0 - 1.0)
+# Switch if loss rate exceeds this
+loss_threshold = 0.3
+
+# Retry attempts before marking adapter as failed
+retry_attempts = 3
+
+# Check interval (seconds)
+# How often to check adapter health
+check_interval_secs = 10
+
+# ============================================================================
+# Heartbeat Protocol
+# ============================================================================
+[heartbeat]
+enabled = true
+
+# Heartbeat interval (seconds)
+# How often to broadcast presence
+interval_secs = 60
+
+# Timeout (seconds)
+# Consider node offline if no heartbeat received within this time
+timeout_secs = 300
+
+# Privacy settings
+include_geolocation = false          # Don't share location (privacy default)
+store_remote_geolocation = false     # Don't store others' locations
+
+# Maximum nodes to track in NodeMap
+max_nodes = 10000
+
+# ============================================================================
+# Heartbeat Discovery
+# ============================================================================
+[heartbeat.discovery]
+# Discovery method: local, dht, bootstrap, hybrid
+method = "hybrid"
+
+# Local network discovery (mDNS/Bonjour)
+[heartbeat.discovery.local]
+enabled = false  # Privacy default: opt-in via Web UI
+multicast_address = "239.255.77.77"
+port = 4001
+ttl = 1  # Don't cross router boundaries
+
+# Bootstrap nodes (for global discovery)
+[heartbeat.discovery.bootstrap]
+enabled = true
+require_reputation = 0.7  # Only trust high-reputation bootstraps
+
+# Official MyriadMesh bootstrap nodes
+# Comment out for isolated/private mesh
+nodes = [
+    # "bootstrap1.myriadmesh.org:4001",
+    # "bootstrap2.myriadmesh.org:4001",
+    # "bootstrap3.myriadmesh.org:4001",
+]
+
+# ============================================================================
+# Heartbeat Adapter Selection
+# ============================================================================
+# Global settings (can be overridden per adapter above)
+broadcast_on_backhaul = false  # Don't use internet uplinks by default
+
+# Privacy filter (0.0 - 1.0)
+# Only broadcast on adapters with privacy >= this threshold
+# 0.0 = all adapters, 1.0 = only anonymous adapters
+min_heartbeat_privacy = 0.0
+
+# ============================================================================
+# Message Suppression
+# ============================================================================
+[heartbeat.suppression]
+enabled = true
+
+# Suppress heartbeat after these activities
+suppress_after_message_ack = true
+suppress_after_relay = true
+suppress_after_dht_query = true
+
+# Suppression timeout (seconds)
+# Don't send heartbeat if activity within this time
+suppress_timeout_secs = 120
+
+# ============================================================================
+# Adapter Health Checks
+# ============================================================================
+[heartbeat.health_checks]
+enabled = true
+
+# How long to wait before checking unused adapters (seconds)
+[heartbeat.health_checks.intervals]
+ethernet = 86400       # 24 hours
+bluetooth = 43200      # 12 hours
+bluetooth_le = 43200   # 12 hours
+lorawan = 604800       # 7 days (expensive)
+cellular = 86400       # 24 hours
+i2p = 43200           # 12 hours
+aprs = 604800         # 7 days (spectrum limited)
+dun = 2592000         # 30 days (very expensive)
+
+# ============================================================================
+# Rate Limiting
+# ============================================================================
+[heartbeat.rate_limiting]
+# Minimum interval between heartbeats from same node (seconds)
+min_interval_per_node_secs = 30
+
+# Maximum total heartbeats per second (all sources)
+max_heartbeats_per_second = 100
+
+# ============================================================================
+# Security
+# ============================================================================
+[heartbeat.security]
+# Require Ed25519 signatures on all heartbeats
+require_signatures = true
+
+# Timestamp tolerance (seconds)
+# Allow this much clock skew between nodes
+timestamp_tolerance_secs = 300
+
+# Enable replay attack protection
+enable_replay_protection = true
+
+# Replay protection cache size
+replay_cache_size = 10000
+
+# ============================================================================
+# Acknowledgement Protocol
+# ============================================================================
+[acknowledgement]
+enabled = true
+
+# Require acknowledgements for all messages
+require_acks = true
+
+# ============================================================================
+# Acknowledgement Timeouts
+# ============================================================================
+[acknowledgement.timeouts]
+# Timeout per adapter type (seconds)
+ethernet = 5
+bluetooth = 10
+bluetooth_le = 15
+lorawan = 60
+i2p = 30
+satellite = 120
+dun = 180
+aprs = 60
+
+# ============================================================================
+# Retry Configuration
+# ============================================================================
+[acknowledgement.retry]
+# Maximum retry attempts
+max_attempts = 3
+
+# Try different adapter on retry
+retry_different_adapter = true
+
+# Exponential backoff multiplier
+backoff_multiplier = 1.5
+
+# ============================================================================
+# Short Hash Configuration
+# ============================================================================
+[acknowledgement.short_hash]
+# Enable short hash for spectrum-constrained adapters
+enabled = true
+
+# Short hashes only valid for this long (seconds)
+max_age_secs = 300
+
+# Use short hash if adapter payload < this size (bytes)
+min_adapter_payload = 32
+
+# ============================================================================
+# Relay Confirmation
+# ============================================================================
+[acknowledgement.relay]
+# Send relay acknowledgements
+send_relay_acks = true
+
+# Send end-to-end ack from final recipient to originator
+send_end_to_end_ack = false
+
+# ============================================================================
+# Heartbeat Suppression via Acknowledgements
+# ============================================================================
+[acknowledgement.heartbeat_suppression]
+enabled = true
+
+# Don't send heartbeat if ack received within this time (seconds)
+suppress_timeout_secs = 120
+
+# ============================================================================
+# Bootstrap and Reputation System
+# ============================================================================
+[bootstrap]
+enabled = true
+
+# Reputation thresholds
+[bootstrap.reputation]
+min_bootstrap_score = 0.7    # Minimum score to be a bootstrap node
+min_coordinator_score = 0.8  # Minimum score to coordinate emergencies
+min_age_days = 15           # Minimum age before becoming bootstrap
+
+# ============================================================================
+# Emergency Detection
+# ============================================================================
+[bootstrap.emergency]
+enabled = true
+
+# Detection interval (seconds)
+detection_interval_secs = 60
+
+# Hosts to check for internet connectivity
+internet_check_hosts = ["8.8.8.8", "1.1.1.1"]
+
+# ============================================================================
+# Reputation Gossip
+# ============================================================================
+[bootstrap.gossip]
+enabled = true
+
+# Gossip interval (seconds)
+interval_secs = 300
+
+# Number of peers to exchange with per round
+peers_per_round = 3
+
+# ============================================================================
+# Emergency Protocol
+# ============================================================================
+[emergency]
+enabled = true
+
+# ============================================================================
+# Emergency Detection
+# ============================================================================
+[emergency.detection]
+# Check interval (seconds)
+check_interval_secs = 60
+
+# Internet check hosts
+internet_check_hosts = ["8.8.8.8", "1.1.1.1"]
+
+# Minimum mesh size to declare emergency (vs critical/catastrophic)
+min_mesh_size_emergency = 10
+min_mesh_size_critical = 3
+
+# ============================================================================
+# Emergency Coordinator
+# ============================================================================
+[emergency.coordinator]
+# Minimum reputation to become coordinator
+min_reputation = 0.8
+
+# Minimum uptime to become coordinator
+min_uptime = 0.9
+
+# Minimum age (days) to become coordinator
+min_age_days = 30
+
+# Coordinator rotation interval (seconds)
+rotation_interval_secs = 14400  # 4 hours
+
+# ============================================================================
+# Message Prioritization
+# ============================================================================
+[emergency.prioritization]
+# Bandwidth allocation per priority level (0.0 - 1.0, must sum to 1.0)
+emergency_allocation = 0.50   # 50% for emergency messages
+high_allocation = 0.25        # 25% for high priority
+important_allocation = 0.15   # 15% for important
+normal_allocation = 0.08      # 8% for normal
+low_allocation = 0.02         # 2% for low priority
+# Bulk messages dropped in emergency mode
+
+# ============================================================================
+# Spectrum Conservation
+# ============================================================================
+[emergency.spectrum]
+# Message batching window (seconds)
+batch_window_secs = 60
+
+# Enable compression in emergency mode
+enable_compression = true
+
+# Reduce payload size (0.0 - 1.0, where 0.5 = half size)
+reduce_payload_size = 0.5
+
+# ============================================================================
+# Emergency Tags
+# ============================================================================
+[emergency.tags]
+# Maximum active emergency tags
+max_active_tags = 10
+
+# Default tag TTL (seconds)
+default_tag_ttl_secs = 86400  # 24 hours
+
+# ============================================================================
+# Amateur Radio Integration
+# ============================================================================
+[emergency.amateur_radio]
+enabled = false
+
+# Amateur radio callsign
+callsign = "N0CALL"
+
+# APRS integration
+aprs_enabled = false
+
+# Voice-to-text transcription
+transcription_enabled = false
+
+# ============================================================================
+# DHT Configuration
+# ============================================================================
+[dht]
+enabled = true
+
+# Kademlia k-bucket size
+k_bucket_size = 20
+
+# Replication factor
+replication_factor = 3
+
+# Key refresh interval (seconds)
+refresh_interval_secs = 3600
+
+# ============================================================================
+# Storage Configuration
+# ============================================================================
+[storage]
+# Database path (relative to data_directory)
+db_path = "myriadnode.db"
+
+# Connection pool size
+max_connections = 10
+
+# Metrics retention (days)
+metrics_retention_days = 30
+
+# Message retention (days)
+message_retention_days = 7
+
+# ============================================================================
+# Monitoring
+# ============================================================================
+[monitoring]
+enabled = true
+
+# Metrics collection interval (seconds)
+interval_secs = 60
+
+# Store metrics in database
+store_metrics = true
+
+# ============================================================================
+# Logging
+# ============================================================================
+[logging]
+# Log level: trace, debug, info, warn, error
+level = "info"
+
+# Log to file
+log_to_file = false
+log_file_path = "myriadnode.log"
+
+# Log rotation
+log_max_size_mb = 100
+log_max_files = 5
+
+# ============================================================================
+# Emergency Abuse Prevention System
+# ============================================================================
+[emergency_abuse_prevention]
+# Enable emergency abuse prevention system
+enabled = true
+
+# Enable size-based penalty modulation
+size_modulation_enabled = true
+
+# Infrequent sender allowance (messages before quota enforcement)
+infrequent_allowance = 3
+
+# High reputation threshold for bypassing quotas
+high_reputation_threshold = 0.8
+
+# Enable bandwidth-aware exemptions for Individual/Family realms
+bandwidth_exemption_enabled = true
+
+# High-speed threshold for bandwidth exemption (10 Mbps)
+high_speed_threshold_bps = 10000000
+
+# Unused bandwidth threshold for exemption (60% = 0.6)
+unused_bandwidth_threshold = 0.6
+
+# Bandwidth sampling window (seconds)
+bandwidth_sampling_window_secs = 60
+
+# ============================================================================
+# Consensus Validator (K-of-N for Global Realm)
+# ============================================================================
+[emergency_abuse_prevention.consensus]
+# Enable consensus validation for Global realm broadcasts
+enabled = true
+
+# Required confirmations (K) - need K out of N approvals
+required_confirmations = 3
+
+# Total validators to query (N)
+total_validators = 5
+
+# Timeout for consensus requests (seconds)
+timeout_secs = 10
+
+# Use DHT for validator discovery (vs manual list)
+use_dht_discovery = true
+
+# ============================================================================
+# Development / Testing
+# ============================================================================
+[dev]
+# Enable development mode (more verbose logging, relaxed security)
+enabled = false
+
+# Enable test mode (mock adapters, simulated network)
+test_mode = false
